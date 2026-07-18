@@ -334,5 +334,3 @@ Contributions are welcome. Please fork the repository, create a feature branch, 
 This project is intended for **educational, research, and portfolio demonstration purposes**.
 
 ---
-Production-grade forecasting • Capacity Planning • Cost Optimization • Predictive Analytics
-</p>
