@@ -1,4 +1,4 @@
-# Python
+﻿# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -28,9 +28,9 @@ MANIFEST
 .streamlit/
 *.log
 
-# Data files
-*.db
-*.sqlite
+# Data files (don't commit generated data)
+data/*.csv
+!data/.gitkeep
 
 # IDE
 .vscode/
@@ -42,10 +42,13 @@ MANIFEST
 .DS_Store
 Thumbs.db
 
+# Environment
+.env
+.env.local
+
 # Reports
 *.pdf
 *.xlsx
 
-# Environment
-.env
-.env.local
+# Notebooks
+.ipynb_checkpoints/

@@ -1,0 +1,12 @@
+﻿services:
+  - type: web
+    name: enterprise-demand-forecasting
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run app.py --server.port=$PORT --server.address=0.0.0.0
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: STREAMLIT_SERVER_PORT
+        value: $PORT
+    plan: free

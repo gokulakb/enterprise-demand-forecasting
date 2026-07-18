@@ -6,97 +6,12 @@ Main application entry point
 import streamlit as st
 import pandas as pd
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
-import sys
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# Generate data if it doesn't exist
-def ensure_data_exists():
-    """Generate sample data if data files don't exist"""
-    required_files = ['traffic.csv', 'applications.csv', 'infrastructure.csv', 'costs.csv']
-    
-    # Check if data directory exists
-    if not os.path.exists('data'):
-        os.makedirs('data')
-    
-    # Check for missing files
-    missing = [f for f in required_files if not os.path.exists(os.path.join('data', f))]
-    
-    if missing:
-        print(f"Generating missing data files: {missing}")
-        try:
-            # Try to import generate_data module
-            import generate_data
-            generate_data.generate_data()
-            print("Data generated using generate_data module")
-        except ImportError:
-            print("Generating data inline...")
-            generate_data_inline()
-            print("Data generated inline")
-
-def generate_data_inline():
-    """Generate data inline if module not available"""
-    import numpy as np
-    from datetime import datetime, timedelta
-    
-    start_date = datetime(2023, 1, 1)
-    dates = [start_date + timedelta(days=i) for i in range(365)]
-    
-    # Traffic data
-    np.random.seed(42)
-    df = pd.DataFrame({
-        'Date': dates,
-        'Requests': np.random.randint(80000, 150000, 365),
-        'UniqueUsers': np.random.randint(4000, 8000, 365),
-        'PageViews': np.random.randint(40000, 70000, 365),
-        'PeakRequests': np.random.randint(120000, 200000, 365),
-        'ResponseTime': np.random.randint(50, 200, 365)
-    })
-    df.to_csv('data/traffic.csv', index=False)
-    
-    # Applications data
-    np.random.seed(123)
-    df = pd.DataFrame({
-        'Date': dates,
-        'Applications': np.random.randint(300, 700, 365),
-        'Interviews': np.random.randint(60, 140, 365),
-        'Offers': np.random.randint(20, 60, 365),
-        'Hires': np.random.randint(10, 50, 365),
-        'Placements': np.random.randint(5, 45, 365)
-    })
-    df.to_csv('data/applications.csv', index=False)
-    
-    # Infrastructure data
-    np.random.seed(456)
-    df = pd.DataFrame({
-        'Date': dates,
-        'CPU': np.random.uniform(20, 80, 365),
-        'Memory': np.random.uniform(30, 85, 365),
-        'Storage': np.random.uniform(40, 90, 365),
-        'Servers': np.random.randint(5, 20, 365),
-        'Latency': np.random.uniform(30, 80, 365),
-        'Bandwidth': np.random.uniform(50, 150, 365)
-    })
-    df.to_csv('data/infrastructure.csv', index=False)
-    
-    # Costs data
-    np.random.seed(789)
-    df = pd.DataFrame({
-        'Month': dates,
-        'ComputeCost': np.random.uniform(300, 700, 365),
-        'StorageCost': np.random.uniform(100, 300, 365),
-        'DatabaseCost': np.random.uniform(200, 400, 365),
-        'NetworkCost': np.random.uniform(80, 220, 365),
-        'MonitoringCost': np.random.uniform(60, 140, 365)
-    })
-    df['TotalCost'] = df[['ComputeCost', 'StorageCost', 'DatabaseCost', 'NetworkCost', 'MonitoringCost']].sum(axis=1)
-    df.to_csv('data/costs.csv', index=False)
-    
-    print("✅ All data files generated inline!")
 
 # Page configuration
 st.set_page_config(
@@ -106,7 +21,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for professional look
+# Custom CSS
 st.markdown("""
     <style>
     .main-header {
@@ -126,21 +41,12 @@ st.markdown("""
         font-weight: 600;
         color: #2c3e50;
     }
-    .metric-label {
-        font-size: 0.9rem;
-        color: #7f8c8d;
-        font-weight: 500;
-    }
     </style>
 """, unsafe_allow_html=True)
 
-# Initialize session state
-if 'data_loaded' not in st.session_state:
-    st.session_state.data_loaded = False
-
 @st.cache_resource
 def load_data():
-    """Load all data with caching"""
+    """Load all data"""
     from utils.loader import DataLoader
     loader = DataLoader()
     data = loader.load_all_data()
@@ -149,10 +55,7 @@ def load_data():
 def main():
     """Main application entry point"""
     
-    # Ensure data exists
-    ensure_data_exists()
-    
-    # Sidebar navigation
+    # Sidebar
     with st.sidebar:
         st.image("https://img.icons8.com/color/96/000000/analytics.png", width=80)
         st.title("📊 Demand Forecasting")
@@ -210,8 +113,19 @@ def main():
         st.error("❌ No data available. Please check data files.")
         return
     
-    # Show success message
+    # Show some basic data to confirm it's working
     st.success(f"✅ Data loaded successfully! {len(data['traffic'])} traffic records found.")
+    
+    # Show sample data
+    with st.expander("📊 View Sample Data"):
+        col1, col2 = st.columns(2)
+        with col1:
+            st.subheader("Traffic Data")
+            st.dataframe(data['traffic'].head(10))
+        with col2:
+            st.subheader("Applications Data")
+            if 'applications' in data:
+                st.dataframe(data['applications'].head(10))
     
     # Page routing
     if page == "overview":
